@@ -65,7 +65,7 @@ void read_dht22() {
         counter = 0;
         while (read_gpio() == last_state) {
             counter++;
-            usleep(3);
+            usleep(1);
             if (counter == 255) break;
         }
         last_state = read_gpio();
