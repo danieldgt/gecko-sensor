@@ -1,19 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <time.h>
-#include <sys/time.h>
-
-#include <wiringPi.h>
-
-#define MAX_TIMINGS 85
-#define DHT_PIN 7 // GPIO 7 = Pin físico 26 (ajuste conforme necessário)
-
-int data[5] = {0, 0, 0, 0, 0};
-
 void read_dht22() {
     uint8_t laststate = HIGH;
     uint8_t counter = 0;
@@ -50,6 +34,10 @@ void read_dht22() {
         }
     }
 
+    // Impressão dos dados brutos recebidos
+    printf("Dados recebidos: %d %d %d %d %d\n", 
+        data[0], data[1], data[2], data[3], data[4]);
+
     if ((j >= 40) && 
         (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
         float h = (data[0] << 8 | data[1]) * 0.1;
@@ -61,18 +49,4 @@ void read_dht22() {
     } else {
         printf("Falha na leitura (checksum inválido)\n");
     }
-}
-
-int main(void) {
-    if (wiringPiSetup() == -1) {
-        fprintf(stderr, "Erro ao iniciar wiringPi\n");
-        return 1;
-    }
-
-    while (1) {
-        read_dht22();
-        delay(2000); // Espera 2 segundos entre leituras
-    }
-
-    return 0;
 }
