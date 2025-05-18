@@ -40,7 +40,7 @@ void export_gpio() {
     if (f) {
         fprintf(f, "%d", GPIO);
         fclose(f);
-        usleep(100000);  // aguarda sistema criar arquivos
+        usleep(100000);  // aguarda o sistema criar os arquivos
     }
 }
 
@@ -52,14 +52,14 @@ void read_dht22() {
     export_gpio();
     set_direction("out");
 
-    // Envia sinal de início: 18ms LOW
+    // Sinal de início: 18ms LOW
     write_gpio(0);
     usleep(18000);
     write_gpio(1);
     usleep(40);
     set_direction("in");
 
-    // Coleta os pulsos (LOW-HIGH alternados)
+    // Coleta pulsos de transição (LOW-HIGH)
     for (i = 0; i < MAX_TIMINGS; i++) {
         counter = 0;
         while (read_gpio() == last_state) {
@@ -71,30 +71,28 @@ void read_dht22() {
         timings[i] = counter;
     }
 
-    // Localiza início automático da transmissão de dados
-    int start = 0;
-    for (i = 0; i < MAX_TIMINGS - 2; i++) {
-        if (timings[i] > 10 && timings[i] < 100 &&
-            timings[i+1] > 10 && timings[i+1] < 100) {
-            start = i;
-            break;
-        }
-    }
-
-    // Leitura dos 40 bits (cada par LOW-HIGH = 1 bit)
+    // Interpreta bits com base no tempo do pulso HIGH
     int bit_index = 0;
-    for (i = start; i < MAX_TIMINGS - 1 && bit_index < 40; i++) {
-        int low = timings[i];
-        int high = timings[i + 1];
+    int bit_started = 0;
+    for (i = 0; i < MAX_TIMINGS; i++) {
+        int duration = timings[i];
 
-        if (low == 0 || high == 0) continue;
+        // Aguarda os pulsos de resposta do sensor (80us LOW + 80us HIGH)
+        if (!bit_started) {
+            if (duration > 10 && duration < 80) {
+                bit_started = 1;
+            }
+            continue;
+        }
 
-        data[bit_index / 8] <<= 1;
-        if (high > 50)  // HIGH > 50us → bit 1
-            data[bit_index / 8] |= 1;
-
-        bit_index++;
-        i++; // pula HIGH
+        // A partir daqui interpretamos os bits
+        if (bit_index < 40) {
+            data[bit_index / 8] <<= 1;
+            if (duration > 50) {
+                data[bit_index / 8] |= 1;
+            }
+            bit_index++;
+        }
     }
 
     // Verifica checksum
@@ -104,7 +102,7 @@ void read_dht22() {
         return;
     }
 
-    // Converte e imprime
+    // Conversão e exibição dos dados
     float humidity = ((data[0] << 8) + data[1]) / 10.0;
     float temperature = ((data[2] & 0x7F) << 8 | data[3]) / 10.0;
     if (data[2] & 0x80) temperature = -temperature;
@@ -115,7 +113,7 @@ void read_dht22() {
 int main() {
     while (1) {
         read_dht22();
-        sleep(2);  // respeita intervalo mínimo entre leituras
+        sleep(2);  // intervalo mínimo recomendado entre leituras
     }
     return 0;
 }
