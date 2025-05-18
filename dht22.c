@@ -21,8 +21,8 @@ void read_dht22() {
 
     data[0] = data[1] = data[2] = data[3] = data[4] = 0;
 
-    #pinMode(DHT_PIN, OUTPUT);
-    #digitalWrite(DHT_PIN, LOW);
+    //pinMode(DHT_PIN, OUTPUT);
+    //digitalWrite(DHT_PIN, LOW);
     
     pinMode(DHT_PIN, INPUT);
     pullUpDnControl(DHT_PIN, PUD_UP);
