@@ -44,7 +44,7 @@ def read_dht22(pin):
         return
 
     # Em vez da média, use um percentil como threshold (ex: 60%)
-    pulse_threshold = sorted(pulse_lengths)[int(len(pulse_lengths)*0.6)]
+    pulse_threshold = sorted(pulse_lengths)[int(len(pulse_lengths)*0.3)]
 
     for pl in pulse_lengths:
         if pl > pulse_threshold:
