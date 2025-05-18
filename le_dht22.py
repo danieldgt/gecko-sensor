@@ -15,7 +15,7 @@ def read_dht22(pin):
     time.sleep(0.00002)  # 20 us
     GPIO.setup(pin, GPIO.IN)
 
-    for i in range(2000):
+    for i in range(500):
         data.append(GPIO.input(pin))
 
     bits = []
@@ -35,7 +35,7 @@ def read_dht22(pin):
         while count < len(data) and data[count] == 1:
             count += 1
         pulse_length = count - start
-        if pulse_length > 10:  # <- aumentamos aqui!
+        if pulse_length > 11:  # <- aumentamos aqui!
             bits.append(1)
         else:
             bits.append(0)
@@ -54,7 +54,7 @@ def read_dht22(pin):
 
     checksum = sum(bytes_[:4]) & 0xFF
     if checksum != bytes_[4]:
-        print("Checksum inválido")
+       # print("Checksum inválido")
         return
 
     humidity = ((bytes_[0] << 8) + bytes_[1]) / 10.0
