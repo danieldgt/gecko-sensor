@@ -35,7 +35,7 @@ def read_dht22(pin):
         while count < len(data) and data[count] == 1:
             count += 1
         pulse_length = count - start
-        if pulse_length > 9:  # <- aumentamos aqui!
+        if pulse_length > 8:  # <- aumentamos aqui!
             bits.append(1)
         else:
             bits.append(0)
