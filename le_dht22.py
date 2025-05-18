@@ -15,12 +15,14 @@ def read_dht22(pin):
     time.sleep(0.00002)  # 20 us
     GPIO.setup(pin, GPIO.IN)
 
-    for i in range(2000):
+    for i in range(3000):
         data.append(GPIO.input(pin))
 
     bits = []
+    pulse_lengths = []
     count = 0
 
+    # Remove sinal inicial do sensor
     while count < len(data) and data[count] == 1:
         count += 1
     while count < len(data) and data[count] == 0:
@@ -28,6 +30,7 @@ def read_dht22(pin):
     while count < len(data) and data[count] == 1:
         count += 1
 
+    # Lê 40 bits de dados
     for i in range(40):
         while count < len(data) and data[count] == 0:
             count += 1
@@ -35,11 +38,22 @@ def read_dht22(pin):
         while count < len(data) and data[count] == 1:
             count += 1
         pulse_length = count - start
-        if pulse_length > 8:  # <- aumentamos aqui!
+        pulse_lengths.append(pulse_length)
+
+    # Calibra o valor de corte com base na média dos pulsos
+    if len(pulse_lengths) != 40:
+        print("Falha na leitura (dados incompletos)")
+        return
+
+    pulse_threshold = sum(pulse_lengths) / len(pulse_lengths)
+
+    for pl in pulse_lengths:
+        if pl > pulse_threshold:
             bits.append(1)
         else:
             bits.append(0)
 
+    # Converte bits em bytes
     if len(bits) != 40:
         print("Falha na leitura (bits incompletos)")
         return
