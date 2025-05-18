@@ -37,7 +37,14 @@ void read_dht22() {
         counter = 0;
         while (digitalRead(DHT_PIN) == laststate) {
             counter++;
-            delayMicroseconds(1);
+            struct timeval start, end;
+            gettimeofday(&start, NULL);
+            while (digitalRead(DHT_PIN) == laststate) {
+                gettimeofday(&end, NULL);
+                long delta = (end.tv_sec - start.tv_sec) * 1000000L + (end.tv_usec - start.tv_usec);
+                if (delta > 1000) break; // 1000us = 1ms
+            }
+
             if (counter == 255)
                 break;
         }
