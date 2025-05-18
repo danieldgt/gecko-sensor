@@ -65,6 +65,8 @@ def read_dht22(pin):
     if bytes_[2] & 0x80:
         temperature = -temperature
 
+    print("Temperatura: {:.1f}°C | Umidade: {:.1f}%".format(temperature, humidity))
+    
     checksum = sum(bytes_[:4]) & 0xFF
     if checksum != bytes_[4]:
         print("Checksum inválido")
