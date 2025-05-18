@@ -65,20 +65,31 @@ void read_dht22() {
         counter = 0;
         while (read_gpio() == last_state) {
             counter++;
-            usleep(1);
+            usleep(2);
             if (counter == 255) break;
         }
         last_state = read_gpio();
         bits[i] = counter;
     }
 
+    printf("Pulsos:\n");
+    for (i = 0; i < MAX_TIMINGS; i++) {
+        printf("%d ", bits[i]);
+    }
+    printf("\n");
+    
     // Parse bits
+   int threshold = 50; // ajuste inicial
     for (i = 0; i < 40; i++) {
         int idx = 3 + i * 2;
         data[i / 8] <<= 1;
-        if (bits[idx] > 16)  // limiar ajustável
+        if (bits[idx] > threshold) {
             data[i / 8] |= 1;
+        }
     }
+
+    printf("Raw bytes: %d %d %d %d %d\n", data[0], data[1], data[2], data[3], data[4]);
+
 
     // Checksum
     if ((data[0] + data[1] + data[2] + data[3]) & 0xFF != data[4]) {
