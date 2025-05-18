@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 #define MAX_TIMINGS 85
-#define GPIO 164  // GPIO164 = pino físico 11 (modo BOARD) no Tinker Board
+#define GPIO 4  // GPIO164 = pino físico 11 (modo BOARD) no Tinker Board
 
 int read_gpio() {
     char path[50], value_str[3];
