@@ -15,11 +15,11 @@ def read_dht22(pin):
     GPIO.output(pin, GPIO.LOW)
     time.sleep(0.02)  # 20 ms
     GPIO.output(pin, GPIO.HIGH)
-    time.sleep(0.00002)  # 20 us
+    time.sleep(0.02)  # 20 us
     GPIO.setup(pin, GPIO.IN)
 
     # Aguarda resposta do sensor
-    for i in range(500):
+    for i in range(2000):
         data.append(GPIO.input(pin))
 
     # Processa os sinais
@@ -42,7 +42,7 @@ def read_dht22(pin):
         while count < len(data) and data[count] == 1:
             count += 1
         pulse_length = count - start
-        if pulse_length > 4:  # valor aproximado, pode ajustar
+        if pulse_length > 10:  # valor aproximado, pode ajustar
             bits.append(1)
         else:
             bits.append(0)
