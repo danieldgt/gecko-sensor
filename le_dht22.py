@@ -1,5 +1,6 @@
 import ASUS.GPIO as GPIO
 import time
+import statistics
 
 DHT_PIN = 11  # Pino físico 11 (modo BOARD)
 
@@ -10,9 +11,9 @@ def read_dht22(pin):
     GPIO.setup(pin, GPIO.OUT)
 
     GPIO.output(pin, GPIO.LOW)
-    time.sleep(0.02)  # 20 ms
+    time.sleep(0.02)
     GPIO.output(pin, GPIO.HIGH)
-    time.sleep(0.00002)  # 20 us
+    time.sleep(0.00002)
     GPIO.setup(pin, GPIO.IN)
 
     for i in range(3000):
@@ -22,7 +23,6 @@ def read_dht22(pin):
     pulse_lengths = []
     count = 0
 
-    # Remove sinal inicial do sensor
     while count < len(data) and data[count] == 1:
         count += 1
     while count < len(data) and data[count] == 0:
@@ -30,7 +30,6 @@ def read_dht22(pin):
     while count < len(data) and data[count] == 1:
         count += 1
 
-    # Lê 40 bits de dados
     for i in range(40):
         while count < len(data) and data[count] == 0:
             count += 1
@@ -40,12 +39,12 @@ def read_dht22(pin):
         pulse_length = count - start
         pulse_lengths.append(pulse_length)
 
-    # Calibra o valor de corte com base na média dos pulsos
     if len(pulse_lengths) != 40:
-        print("Falha na leitura (dados incompletos)")
+        print("Falha na leitura (pulsos incompletos)")
         return
 
-    pulse_threshold = sum(pulse_lengths) / len(pulse_lengths)
+    # Em vez da média, use um percentil como threshold (ex: 60%)
+    pulse_threshold = sorted(pulse_lengths)[int(len(pulse_lengths)*0.6)]
 
     for pl in pulse_lengths:
         if pl > pulse_threshold:
@@ -53,7 +52,6 @@ def read_dht22(pin):
         else:
             bits.append(0)
 
-    # Converte bits em bytes
     if len(bits) != 40:
         print("Falha na leitura (bits incompletos)")
         return
@@ -78,7 +76,6 @@ def read_dht22(pin):
 
     print("Temperatura: {:.1f}°C | Umidade: {:.1f}%".format(temperature, humidity))
 
-# Execução
 if __name__ == "__main__":
     try:
         while True:
