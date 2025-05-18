@@ -74,12 +74,13 @@ void read_dht22() {
 
     // Processa os bits
     int bit_index = 0;
-    for (i = 0; i < MAX_TIMINGS - 1 && bit_index < 40; i++) {
+     // Pular os 3 primeiros pares válidos (aproximadamente 6 pulsos: LOW+HIGH x 3)
+    int start = 6;
+    for (i = start; i < MAX_TIMINGS - 1 && bit_index < 40; i++) {
         int low = timings[i];
         int high = timings[i + 1];
 
-        // Ignora os primeiros pares (resposta do sensor)
-        if (i < 4) continue;
+        if (low == 0 || high == 0) continue;
 
         data[bit_index / 8] <<= 1;
         if (high > 50) {
@@ -87,7 +88,7 @@ void read_dht22() {
         }
 
         bit_index++;
-        i++;  // avança para o próximo par
+        i++;  // pula HIGH
     }
 
     // Verifica checksum
