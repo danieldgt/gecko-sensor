@@ -3,10 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <time.h>
 
 #define MAX_TIMINGS 85
-#define GPIO 164
+#define GPIO 164  // GPIO164 = pino físico 11 na Tinker Board
 
 int read_gpio() {
     char path[50], value_str[3];
@@ -23,10 +22,7 @@ void write_gpio(int value) {
     sprintf(path, "/sys/class/gpio/gpio%d/value", GPIO);
     int fd = open(path, O_WRONLY);
     if (fd < 0) return;
-    if (value)
-        write(fd, "1", 1);
-    else
-        write(fd, "0", 1);
+    write(fd, value ? "1" : "0", 1);
     close(fd);
 }
 
@@ -49,14 +45,14 @@ void export_gpio() {
 }
 
 void read_dht22() {
-    int data[5] = {0,0,0,0,0};
-    int last_state = 1, counter = 0, j = 0, i;
+    int data[5] = {0, 0, 0, 0, 0};
+    int last_state = 1, counter = 0, i;
     int bits[MAX_TIMINGS];
 
     export_gpio();
     set_direction("out");
     write_gpio(0);
-    usleep(18000);
+    usleep(18000);  // Sinal de início: 18ms
     write_gpio(1);
     usleep(40);
     set_direction("in");
@@ -65,42 +61,40 @@ void read_dht22() {
         counter = 0;
         while (read_gpio() == last_state) {
             counter++;
-            usleep(6);
-            if (counter == 255) break;
+            usleep(1);
+            if (counter >= 255) break;
         }
         last_state = read_gpio();
         bits[i] = counter;
     }
 
-    printf("Pulsos:\n");
-    for (i = 0; i < MAX_TIMINGS; i++) {
-        printf("%d ", bits[i]);
-    }
-    printf("\n");
-    
-    // Parse bits
-    int threshold = 50; // ajuste inicial
+    // Parse 40 bits baseando-se em pares LOW + HIGH
     int bit_index = 0;
-    for (i = 0; i < MAX_TIMINGS; i++) {
-        if (bits[i] > threshold) {
-            data[bit_index / 8] <<= 1;
-            data[bit_index / 8] |= 1;
+    for (i = 0; i < MAX_TIMINGS - 1; i++) {
+        int low = bits[i];
+        int high = bits[i + 1];
+
+        if (low == 0 || high == 0) continue;
+
+        // Ignora os primeiros 3 pares de sincronização
+        if (bit_index < 0) {
             bit_index++;
-        } else if (bits[i] > 0) {
-            data[bit_index / 8] <<= 1;
-            bit_index++;
+            continue;
         }
 
+        data[bit_index / 8] <<= 1;
+        if (high > 50)  // HIGH > 50us → bit 1
+            data[bit_index / 8] |= 1;
+
+        bit_index++;
+        i++;  // pula HIGH
         if (bit_index >= 40) break;
     }
 
-
-    printf("Raw bytes: %d %d %d %d %d\n", data[0], data[1], data[2], data[3], data[4]);
-
-
     // Checksum
-    if ((data[0] + data[1] + data[2] + data[3]) & 0xFF != data[4]) {
-        printf("Checksum inválido\n");
+    if (((data[0] + data[1] + data[2] + data[3]) & 0xFF) != data[4]) {
+        printf("Checksum inválido. Bytes lidos: %d %d %d %d %d\n",
+               data[0], data[1], data[2], data[3], data[4]);
         return;
     }
 
