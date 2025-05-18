@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 #define MAX_TIMINGS 85
-#define GPIO 164  // Pino físico 11 na Tinker Board S
+#define GPIO 164  // GPIO164 = pino físico 11 (modo BOARD) no Tinker Board
 
 int read_gpio() {
     char path[50], value_str[3];
@@ -40,7 +40,7 @@ void export_gpio() {
     if (f) {
         fprintf(f, "%d", GPIO);
         fclose(f);
-        usleep(100000);
+        usleep(100000);  // aguarda sistema criar arquivos
     }
 }
 
@@ -52,15 +52,14 @@ void read_dht22() {
     export_gpio();
     set_direction("out");
 
-    // Start signal: LOW por pelo menos 1ms (18ms padrão)
+    // Envia sinal de início: 18ms LOW
     write_gpio(0);
-    usleep(18000);  // 18 ms
+    usleep(18000);
     write_gpio(1);
-    usleep(40);     // 40 us
-
+    usleep(40);
     set_direction("in");
 
-    // Coleta pulsos (LOW + HIGH)
+    // Coleta os pulsos (LOW-HIGH alternados)
     for (i = 0; i < MAX_TIMINGS; i++) {
         counter = 0;
         while (read_gpio() == last_state) {
@@ -72,10 +71,18 @@ void read_dht22() {
         timings[i] = counter;
     }
 
-    // Processa os bits
+    // Localiza início automático da transmissão de dados
+    int start = 0;
+    for (i = 0; i < MAX_TIMINGS - 2; i++) {
+        if (timings[i] > 10 && timings[i] < 100 &&
+            timings[i+1] > 10 && timings[i+1] < 100) {
+            start = i;
+            break;
+        }
+    }
+
+    // Leitura dos 40 bits (cada par LOW-HIGH = 1 bit)
     int bit_index = 0;
-     // Pular os 3 primeiros pares válidos (aproximadamente 6 pulsos: LOW+HIGH x 3)
-    int start = 6;
     for (i = start; i < MAX_TIMINGS - 1 && bit_index < 40; i++) {
         int low = timings[i];
         int high = timings[i + 1];
@@ -83,12 +90,11 @@ void read_dht22() {
         if (low == 0 || high == 0) continue;
 
         data[bit_index / 8] <<= 1;
-        if (high > 50) {
+        if (high > 50)  // HIGH > 50us → bit 1
             data[bit_index / 8] |= 1;
-        }
 
         bit_index++;
-        i++;  // pula HIGH
+        i++; // pula HIGH
     }
 
     // Verifica checksum
@@ -98,6 +104,7 @@ void read_dht22() {
         return;
     }
 
+    // Converte e imprime
     float humidity = ((data[0] << 8) + data[1]) / 10.0;
     float temperature = ((data[2] & 0x7F) << 8 | data[3]) / 10.0;
     if (data[2] & 0x80) temperature = -temperature;
@@ -108,7 +115,7 @@ void read_dht22() {
 int main() {
     while (1) {
         read_dht22();
-        sleep(2);  // Tempo mínimo entre leituras conforme datasheet
+        sleep(2);  // respeita intervalo mínimo entre leituras
     }
     return 0;
 }
