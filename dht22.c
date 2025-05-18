@@ -79,6 +79,7 @@ void read_dht22() {
     printf("\n");
     
     // Parse bits
+    int threshold = 50; // ajuste inicial
     int bit_index = 0;
     for (i = 0; i < MAX_TIMINGS; i++) {
         if (bits[i] > threshold) {
