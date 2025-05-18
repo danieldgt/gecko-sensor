@@ -79,14 +79,20 @@ void read_dht22() {
     printf("\n");
     
     // Parse bits
-   int threshold = 50; // ajuste inicial
-    for (i = 0; i < 40; i++) {
-        int idx = 3 + i * 2;
-        data[i / 8] <<= 1;
-        if (bits[idx] > threshold) {
-            data[i / 8] |= 1;
+    int bit_index = 0;
+    for (i = 0; i < MAX_TIMINGS; i++) {
+        if (bits[i] > threshold) {
+            data[bit_index / 8] <<= 1;
+            data[bit_index / 8] |= 1;
+            bit_index++;
+        } else if (bits[i] > 0) {
+            data[bit_index / 8] <<= 1;
+            bit_index++;
         }
+
+        if (bit_index >= 40) break;
     }
+
 
     printf("Raw bytes: %d %d %d %d %d\n", data[0], data[1], data[2], data[3], data[4]);
 
