@@ -17,8 +17,9 @@ humidity = sensor.humidity()
 temperature = sensor.temperature()
 
 if humidity is not None:
-    print(f"Umidade: {humidity:.1f}%")
-    print(f"Temperatura: {temperature:.1f}°C")
+   print("Umidade: {:.1f}%".format(humidity))
+   print("Temperatura: {:.1f}°C".format(temperature))
+
 else:
     print("Erro na leitura.")
 
