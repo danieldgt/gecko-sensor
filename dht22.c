@@ -21,11 +21,16 @@ void read_dht22() {
 
     data[0] = data[1] = data[2] = data[3] = data[4] = 0;
 
-    pinMode(DHT_PIN, OUTPUT);
-    digitalWrite(DHT_PIN, LOW);
-    delay(20);  // pelo menos 1ms (20ms para garantir)
+    #pinMode(DHT_PIN, OUTPUT);
+    #digitalWrite(DHT_PIN, LOW);
+    
+    pinMode(DHT_PIN, INPUT);
+    pullUpDnControl(DHT_PIN, PUD_UP);
+
+    
+    delay(30);  // pelo menos 1ms (20ms para garantir)
     digitalWrite(DHT_PIN, HIGH);
-    delayMicroseconds(40);
+    delayMicroseconds(80);
     pinMode(DHT_PIN, INPUT);
 
     for (i = 0; i < MAX_TIMINGS; i++) {
