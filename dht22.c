@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 #define MAX_TIMINGS 85
-#define GPIO 164  // GPIO164 = pino físico 11 (modo BOARD) no Tinker Board
+#define GPIO 166  // GPIO163 = pino físico 13 (modo BOARD) no Tinker Board
 
 int read_gpio() {
     char path[50], value_str[3];
@@ -107,6 +107,8 @@ void read_dht22() {
     float temperature = ((data[2] & 0x7F) << 8 | data[3]) / 10.0;
     if (data[2] & 0x80) temperature = -temperature;
 
+      printf("Bytes lidos: %02X %02X %02X %02X %02X\n",
+           data[0], data[1], data[2], data[3], data[4]);
     printf("Temperatura: %.1f°C | Umidade: %.1f%%\n", temperature, humidity);
 }
 
