@@ -70,13 +70,13 @@ try:
         result2 = read_dht22(DHT_PIN2)
         if result:
             temp, hum = result
-            print("Temperatura: {}°C, Umidade: {}%".format(temp, hum))
+            print("1- Temperatura: {}°C, Umidade: {}%".format(temp, hum))
         else:
             print("Falha ao ler o sensor 1")
 
         if result2:
             temp2, hum2 = result2
-            print("Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
+            print("2- Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
         else:
             print("Falha ao ler o sensor 2")
 
