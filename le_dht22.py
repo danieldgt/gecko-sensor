@@ -1,6 +1,6 @@
 import ASUS.GPIO as GPIO
 import time
-
+GPIO.setwarnings(False)
 DHT_PIN = 7  # Pino físico 7 (GPIO 4)
 
 def read_dht22(pin):
