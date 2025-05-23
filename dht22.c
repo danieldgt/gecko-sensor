@@ -1,95 +1,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <string.h>
 #include <sys/time.h>
-
-#include <wiringPi.h>
+#include <ASUS_GPIO.h>
 
 #define MAX_TIMINGS 85
-#define DHT_PIN 7 // GPIO 7 = Pin físico 26 (ajuste conforme necessário)
+#define DHT_PIN 7  // pino físico (BOARD) 7 = GPIO 4
 
 int data[5] = {0, 0, 0, 0, 0};
 
-void read_dht22() {
-    uint8_t laststate = HIGH;
-    uint8_t counter = 0;
-    uint8_t j = 0, i;
+int main(void) {
+    int laststate = 1;
+    int counter = 0;
+    int j = 0, i;
 
-    data[0] = data[1] = data[2] = data[3] = data[4] = 0;
+    GPIO_setwarnings(0);
+    GPIO_setmode(GPIO_BOARD);
+    GPIO_setup(DHT_PIN, GPIO_OUT);
+    GPIO_output(DHT_PIN, 1);
+    usleep(500000);  // 500ms
 
-    //pinMode(DHT_PIN, OUTPUT);
-    //digitalWrite(DHT_PIN, LOW);
-    
-    pinMode(DHT_PIN, INPUT);
-    pullUpDnControl(DHT_PIN, PUD_UP);
-
-    
-    delay(30);  // pelo menos 1ms (20ms para garantir)
-    digitalWrite(DHT_PIN, HIGH);
-    delayMicroseconds(80);
-    pinMode(DHT_PIN, INPUT);
+    GPIO_output(DHT_PIN, 0);
+    usleep(20000);   // 20ms
+    GPIO_output(DHT_PIN, 1);
+    GPIO_setup(DHT_PIN, GPIO_IN);
 
     for (i = 0; i < MAX_TIMINGS; i++) {
         counter = 0;
-        while (digitalRead(DHT_PIN) == laststate) {
+        while (GPIO_input(DHT_PIN) == laststate) {
             counter++;
-            struct timeval start, end;
-            gettimeofday(&start, NULL);
-            while (digitalRead(DHT_PIN) == laststate) {
-                gettimeofday(&end, NULL);
-                long delta = (end.tv_sec - start.tv_sec) * 1000000L + (end.tv_usec - start.tv_usec);
-                if (delta > 1000) break; // 1000us = 1ms
-            }
-
-            if (counter == 255)
+            usleep(1);
+            if (counter == 255) {
                 break;
+            }
         }
 
-        laststate = digitalRead(DHT_PIN);
+        laststate = GPIO_input(DHT_PIN);
 
-        if (counter == 255) break;
+        if (counter == 255)
+            break;
 
-        // ignorar os primeiros 3 pulsos
+        // Ignore first 3 transitions
         if ((i >= 4) && (i % 2 == 0)) {
             data[j / 8] <<= 1;
-            if (counter > 50)
+            if (counter > 16)
                 data[j / 8] |= 1;
             j++;
         }
     }
 
-    // Impressão dos dados brutos recebidos
-    printf("Dados recebidos: %d %d %d %d %d\n", 
-        data[0], data[1], data[2], data[3], data[4]);
-
-    if ((j >= 40) && 
+    if ((j >= 40) &&
         (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
-        float h = (data[0] << 8 | data[1]) * 0.1;
-        float t = ((data[2] & 0x7F) << 8 | data[3]) * 0.1;
-        if (data[2] & 0x80) t = -t;
-
-        printf("Umidade: %.1f %%\n", h);
-        printf("Temperatura: %.1f *C\n", t);
+        float h = data[0];
+        float t = data[2];
+        printf("HUMIDADE: %.1f\n", h);
+        printf("TEMPERATURA: %.1f\n", t);
+        return 0;
     } else {
-        printf("Falha na leitura (checksum inválido)\n");
-    }
-}
-
-
-int main(void) {
-    if (wiringPiSetup() == -1) {
-        fprintf(stderr, "Erro ao iniciar wiringPi\n");
+        printf("FALHA: leitura inválida.\n");
         return 1;
     }
-
-    while (1) {
-        read_dht22();
-        delay(2000); // Espera 2 segundos entre leituras
-    }
-
-    return 0;
 }
