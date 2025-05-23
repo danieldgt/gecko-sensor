@@ -5,6 +5,7 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
 DHT_PIN = 7  # Pino físico 7 (GPIO 4)
+DHT_PIN2 = 8  # Pino físico 8 (GPIO 4)
 
 def read_dht22(pin):
     data = []
@@ -66,15 +67,24 @@ def read_dht22(pin):
 try:
     while True:
         result = read_dht22(DHT_PIN)
+        result2 = read_dht22(DHT_PIN2)
         if result:
             temp, hum = result
             print("Temperatura: {}°C, Umidade: {}%".format(temp, hum))
         else:
-            print("Falha ao ler o sensor")
+            print("Falha ao ler o sensor 1")
+
+        if result2:
+            temp2, hum2 = result2
+            print("Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
+        else:
+            print("Falha ao ler o sensor 2")
 
         # Limpa estado do pino após cada leitura
         GPIO.setup(DHT_PIN, GPIO.OUT)
         GPIO.output(DHT_PIN, GPIO.HIGH)
+        GPIO.setup(DHT_PIN2, GPIO.OUT)
+        GPIO.output(DHT_PIN2, GPIO.HIGH)
         time.sleep(4)  # intervalo mínimo entre leituras
 
 except KeyboardInterrupt:
