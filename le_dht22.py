@@ -5,7 +5,7 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
 DHT_PIN = 7  # Pino físico 7 (GPIO 4)
-DHT_PIN2 = 8  # Pino físico 8 (GPIO 4)
+DHT_PIN2 = 8 # Pino físico 8 (GPIO 14)
 
 def read_dht22(pin):
     data = []
