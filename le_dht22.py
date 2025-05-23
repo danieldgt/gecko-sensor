@@ -1,21 +1,25 @@
 import ASUS.GPIO as GPIO
 import time
+
+# Suprime avisos como "This channel is already in use"
 GPIO.setwarnings(False)
+
+# Define o modo de numeração de pinos como físico (BOARD)
+GPIO.setmode(GPIO.BOARD)
+
 DHT_PIN = 7  # Pino físico 7 (GPIO 4)
 
 def read_dht22(pin):
     data = []
 
-    GPIO.setmode(GPIO.BOARD)
+    # Sinal de início
     GPIO.setup(pin, GPIO.OUT)
-    
-    # Iniciar o sinal de início
     GPIO.output(pin, GPIO.LOW)
     time.sleep(0.02)  # 20ms
     GPIO.output(pin, GPIO.HIGH)
     GPIO.setup(pin, GPIO.IN)
 
-    # Ler a resposta do sensor
+    # Espera a resposta do sensor
     count = 0
     while GPIO.input(pin) == GPIO.HIGH:
         count += 1
@@ -23,26 +27,24 @@ def read_dht22(pin):
             print("Timeout esperando resposta do sensor (pull down)")
             return None
 
-    # Espera pelo início dos dados
     while GPIO.input(pin) == GPIO.LOW:
         continue
     while GPIO.input(pin) == GPIO.HIGH:
         continue
 
-    # Lê 40 bits de dados
+    # Lê 40 bits (5 bytes)
     for i in range(40):
         while GPIO.input(pin) == GPIO.LOW:
             continue
-
         t = time.time()
         while GPIO.input(pin) == GPIO.HIGH:
             continue
-        if time.time() - t > 0.00005:  # 50 microssegundos
+        if time.time() - t > 0.00005:
             data.append(1)
         else:
             data.append(0)
 
-    # Agrupa os bits em bytes
+    # Converte os bits em valores
     humidity_bit = data[0:8]
     humidity_point_bit = data[8:16]
     temperature_bit = data[16:24]
@@ -59,7 +61,7 @@ def read_dht22(pin):
 
     return humidity, temperature
 
-# Teste
+# Loop de leitura
 try:
     while True:
         result = read_dht22(DHT_PIN)
