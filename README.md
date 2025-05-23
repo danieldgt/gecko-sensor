@@ -23,10 +23,9 @@ sudo pip3 install ASUS.GPIO
 
 ## 4. Configuração do Projeto
 
-Crie e acesse o diretório do projeto:
+Clonne e acesse o diretório do projeto:
 
 ```bash
-mkdir ~/gecko-sensors
 cd ~/gecko-sensors
 ```
 
