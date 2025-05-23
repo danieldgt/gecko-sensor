@@ -43,7 +43,7 @@ def pulse_time():
 
         t_end = time.time()
 
-        pulse_len = (t_end - t_start) * 1_000_000  # microssegundos
+        pulse_len = (t_end - t_start) * 1000000  # microssegundos
         timings.append(pulse_len)
 
     return timings
