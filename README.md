@@ -32,3 +32,9 @@ cd ~/gecko-sensors
 
 O arquivo Python (`le_dht22.py`) é uma poc de leitura de temperatura e umidade usando o sensor: Módulo Sensor De Umidade E Temperatura Am2302 Dht22.
 
+
+## 5. Executar o Script
+
+sudo python3 le_dht22.py
+
+Agora sua Tinker Board S estará pronta e funcionando novamente com seus sensores DHT22.
