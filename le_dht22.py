@@ -59,8 +59,8 @@ def read_dht22(pin):
         temperature_raw = -(temperature_raw & 0x7FFF)
     temperature = temperature_raw / 10.0
 
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.HIGH)
+    GPIO.setup(DHT_PIN, GPIO.OUT)
+    GPIO.output(DHT_PIN, GPIO.HIGH)
 
     return temperature, humidity
 
