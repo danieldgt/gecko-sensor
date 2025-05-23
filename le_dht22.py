@@ -5,8 +5,10 @@ import time
 import datetime
 import threading
 import Adafruit_DHT
+import ASUS.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+pin = 7  # Por exemplo, BOARD pin 7 = GPIO 4
 
-pin = 4
 sensor = Adafruit_DHT.DHT22
 
 def tick():
