@@ -65,7 +65,7 @@ try:
         result = read_dht22(DHT_PIN)
         if result:
             humidity, temperature = result
-            print(f"Temperatura: {temperature}°C, Umidade: {humidity}%")
+            print("Temperatura: {}°C, Umidade: {}%".format(temperature, humidity))
         else:
             print("Falha na leitura.")
         time.sleep(2)
