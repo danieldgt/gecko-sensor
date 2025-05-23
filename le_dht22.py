@@ -59,9 +59,6 @@ def read_dht22(pin):
         temperature_raw = -(temperature_raw & 0x7FFF)
     temperature = temperature_raw / 10.0
 
-    GPIO.setup(DHT_PIN, GPIO.OUT)
-    GPIO.output(DHT_PIN, GPIO.HIGH)
-
     return temperature, humidity
 
 
@@ -78,7 +75,7 @@ try:
         # Limpa estado do pino após cada leitura
         GPIO.setup(DHT_PIN, GPIO.OUT)
         GPIO.output(DHT_PIN, GPIO.HIGH)
-        time.sleep(3)  # intervalo mínimo entre leituras
+        time.sleep(2)  # intervalo mínimo entre leituras
 
 except KeyboardInterrupt:
     GPIO.cleanup()
