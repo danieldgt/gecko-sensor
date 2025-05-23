@@ -1,27 +1,57 @@
-import pigpio
+import tkinter as tk
+import numpy as np
+import random
 import time
-import DHT22  # Este é um arquivo dht22 personalizado que você irá criar abaixo
+import datetime
+import threading
+import Adafruit_DHT
 
-pi = pigpio.pi()  # Conecta ao daemon pigpiod
+pin = 4
+sensor = Adafruit_DHT.DHT22
 
-if not pi.connected:
-    print("Erro: pigpio daemon não está rodando.")
-    exit()
+def tick():
 
-sensor = DHT22.sensor(pi, 4)  # GPIO 4 (ajuste conforme necessário)
-sensor.trigger()
+    time2=time.strftime('%H:%M:%S')
+    clock.config(text=time2)
+    clock.after(200,tick)
 
-time.sleep(2)  # Espera os dados estarem disponíveis
 
-humidity = sensor.humidity()
-temperature = sensor.temperature()
+def get_data():
 
-if humidity is not None:
-   print("Umidade: {:.1f}%".format(humidity))
-   print("Temperatura: {:.1f}°C".format(temperature))
 
-else:
-    print("Erro na leitura.")
+    humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 
-sensor.cancel()
-pi.stop()
+    if humidity is not None and temperature is not None:
+        print('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity))
+        l_display.config(text = temperature)
+    else:
+        print('Failed to get reading. Try again!')
+
+     # Reagendar para 5 segundos depois
+    mainwindow.after(5000, get_data)
+
+    return temperature
+
+
+
+mainwindow = tk.Tk()
+mainwindow.geometry('640x340')
+mainwindow.title("Sensor Data Live Feed ")
+
+clock=tk.Label(mainwindow,font=("Arial",30), bg='green',fg="white")
+clock.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+l_m=tk.Label(mainwindow,text="Sensor Data ",font=("Arial",30),fg="Black")
+l_m.grid(row=0,column=1, padx=10, pady=10, sticky="nsew")
+
+l_t=tk.Label(mainwindow, text="Temperature C",font=("Arial",25))
+l_t.grid(row=1,column=0, padx=10, pady=10, sticky="nsew")
+
+l_display=tk.Label(mainwindow,font=("Arial",25),fg="red")
+l_display.grid(row=1,column=1, padx=10, pady=10, sticky="nsew")
+
+
+tick()
+get_data()
+
+mainwindow.mainloop()
