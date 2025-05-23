@@ -75,7 +75,7 @@ try:
         # Limpa estado do pino após cada leitura
         GPIO.setup(DHT_PIN, GPIO.OUT)
         GPIO.output(DHT_PIN, GPIO.HIGH)
-        time.sleep(2)  # intervalo mínimo entre leituras
+        time.sleep(4)  # intervalo mínimo entre leituras
 
 except KeyboardInterrupt:
     GPIO.cleanup()
