@@ -84,7 +84,7 @@ def piscar_leds_sequencia():
         for cor in ordem:
             for c, pin in LED_PINS.items():
                 GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
-            time.sleep(1)
+            time.sleep(0.2)  # Pisca a cada 200ms
 
 # Thread para ler sensores
 def ler_sensores():
