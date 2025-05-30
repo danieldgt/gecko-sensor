@@ -1,18 +1,33 @@
 import ASUS.GPIO as GPIO
 import time
+import threading
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
-DHT_PIN = 7  # Pino físico 7 (GPIO 4)
-DHT_PIN2 = 8 # Pino físico 8 (GPIO 14)
+# Pinos dos sensores
+DHT_PIN = 7   # Pino físico 7 (GPIO 4)
+DHT_PIN2 = 8  # Pino físico 8 (GPIO 14)
+
+# Pinos dos LEDs
+LED_PINS = {
+    'Azul': 11,     # GPIO 17
+    'Verde': 13,    # GPIO 27
+    'Vermelho': 15, # GPIO 22
+    'Amarelo': 16   # GPIO 23
+}
+
+# Inicializa os pinos dos LEDs
+for pin in LED_PINS.values():
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.LOW)
 
 def read_dht22(pin):
     data = []
 
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
-    time.sleep(0.02)  # 20ms LOW start
+    time.sleep(0.02)
     GPIO.output(pin, GPIO.HIGH)
     GPIO.setup(pin, GPIO.IN)
 
@@ -62,30 +77,48 @@ def read_dht22(pin):
 
     return temperature, humidity
 
-
-# Leitura em loop com recuperação entre ciclos
-try:
+# Thread para piscar LEDs
+def piscar_leds():
+    estado = False
     while True:
-        result = read_dht22(DHT_PIN)
-        result2 = read_dht22(DHT_PIN2)
-        if result:
-            temp, hum = result
-            print("1- Temperatura: {}°C, Umidade: {}%".format(temp, hum))
-        else:
-            print("Falha ao ler o sensor 1")
+        estado = not estado
+        for pin in LED_PINS.values():
+            GPIO.output(pin, GPIO.HIGH if estado else GPIO.LOW)
+        time.sleep(1)
 
-        if result2:
-            temp2, hum2 = result2
-            print("2- Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
-        else:
-            print("Falha ao ler o sensor 2")
+# Thread para ler sensores
+def ler_sensores():
+    try:
+        while True:
+            result = read_dht22(DHT_PIN)
+            result2 = read_dht22(DHT_PIN2)
+            if result:
+                temp, hum = result
+                print("1 - Temperatura: {}°C, Umidade: {}%".format(temp, hum))
+            else:
+                print("Falha ao ler o sensor 1")
 
-        # Limpa estado do pino após cada leitura
-        GPIO.setup(DHT_PIN, GPIO.OUT)
-        GPIO.output(DHT_PIN, GPIO.HIGH)
-        GPIO.setup(DHT_PIN2, GPIO.OUT)
-        GPIO.output(DHT_PIN2, GPIO.HIGH)
-        time.sleep(4)  # intervalo mínimo entre leituras
+            if result2:
+                temp2, hum2 = result2
+                print("2 - Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
+            else:
+                print("Falha ao ler o sensor 2")
 
-except KeyboardInterrupt:
-    GPIO.cleanup()
+            # Reset dos pinos dos sensores
+            GPIO.setup(DHT_PIN, GPIO.OUT)
+            GPIO.output(DHT_PIN, GPIO.HIGH)
+            GPIO.setup(DHT_PIN2, GPIO.OUT)
+            GPIO.output(DHT_PIN2, GPIO.HIGH)
+
+            time.sleep(4)
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+# Inicia threads separadas
+t1 = threading.Thread(target=piscar_leds, daemon=True)
+t2 = threading.Thread(target=ler_sensores)
+
+t1.start()
+t2.start()
+
+t2.join()
