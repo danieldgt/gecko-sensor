@@ -56,4 +56,8 @@ O arquivo Python (`le_dht22.py`) é uma poc de leitura de temperatura e umidade 
 sudo python3 le_dht22.py
 ```
 
+```bash
+sudo python3 rele_4vias.py
+```
+
 Agora sua Tinker Board S estará pronta e funcionando novamente com seus sensores DHT22.
