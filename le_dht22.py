@@ -77,14 +77,14 @@ def read_dht22(pin):
 
     return temperature, humidity
 
-# Thread para piscar LEDs
-def piscar_leds():
-    estado = False
+# Thread para piscar LEDs na sequência especificada
+def piscar_leds_sequencia():
+    ordem = ['Azul', 'Verde', 'Vermelho', 'Amarelo', 'Vermelho', 'Verde', 'Azul']
     while True:
-        estado = not estado
-        for pin in LED_PINS.values():
-            GPIO.output(pin, GPIO.HIGH if estado else GPIO.LOW)
-        time.sleep(1)
+        for cor in ordem:
+            for c, pin in LED_PINS.items():
+                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
+            time.sleep(1)
 
 # Thread para ler sensores
 def ler_sensores():
@@ -115,7 +115,7 @@ def ler_sensores():
         GPIO.cleanup()
 
 # Inicia threads separadas
-t1 = threading.Thread(target=piscar_leds, daemon=True)
+t1 = threading.Thread(target=piscar_leds_sequencia, daemon=True)
 t2 = threading.Thread(target=ler_sensores)
 
 t1.start()
