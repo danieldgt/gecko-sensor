@@ -79,7 +79,7 @@ def read_dht22(pin):
 
 # Thread para piscar LEDs na sequência especificada
 def piscar_leds_sequencia():
-    ordem = ['Azul', 'Verde', 'Vermelho', 'Amarelo', 'Vermelho', 'Verde', 'Azul']
+    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
     while True:
         for cor in ordem:
             for c, pin in LED_PINS.items():
