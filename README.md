@@ -39,6 +39,22 @@ sudo apt install python3 python3-pip python3-dev -y
 sudo pip3 install ASUS.GPIO
 ```
 
+- Instalar as bibliotecas necessárias para o display:
+
+Você pode usar a biblioteca luma.oled, que funciona em SBCs como a Tinker Board (com Python 3):
+
+```bash
+sudo apt-get update
+sudo apt-get install python3-pip python3-dev libjpeg-dev libfreetype6-dev libi2c-dev libffi-dev
+sudo pip3 install luma.oled
+```
+
+E ative o I2C no sistema:
+
+```bash
+sudo modprobe i2c-dev
+```
+
 ## 4. Configuração do Projeto
 
 Clonne e acesse o diretório do projeto:
