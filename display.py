@@ -62,7 +62,7 @@ def render_image():
     elif pagina_atual == 3:
         try:
             logo = Image.open("gecko.bmp").convert("1")
-            logo = ImageOps.invert(logo)  # se necessário inverter cores
+           # logo = ImageOps.invert(logo)  # se necessário inverter cores
             logo = logo.resize((100, HEIGHT))
             image.paste(logo, (0, 0))
         except:
