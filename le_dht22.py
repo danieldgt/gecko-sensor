@@ -1,3 +1,4 @@
+import display
 import ASUS.GPIO as GPIO
 import time
 import threading
