@@ -6,11 +6,9 @@ import threading
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
-# Pinos dos sensores
-DHT_PIN = 7   # Pino físico 7 (GPIO 4)
-DHT_PIN2 = 8  # Pino físico 8 (GPIO 14)
-
-# Pinos dos LEDs
+# === CONFIGURACAO DE PINOS ===
+DHT_PIN = 7
+DHT_PIN2 = 8
 LED_PINS = {
     'Azul': 11,     # GPIO 17
     'Verde': 13,    # GPIO 27
@@ -18,11 +16,11 @@ LED_PINS = {
     'Amarelo': 16   # GPIO 23
 }
 
-# Inicializa os pinos dos LEDs
 for pin in LED_PINS.values():
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
 
+# === SENSOR DHT22 ===
 def read_dht22(pin):
     data = []
 
@@ -71,14 +69,13 @@ def read_dht22(pin):
         return None
 
     humidity = humidity_raw / 10.0
-
     if temperature_raw & 0x8000:
         temperature_raw = -(temperature_raw & 0x7FFF)
     temperature = temperature_raw / 10.0
 
     return temperature, humidity
 
-# ======== Classe de filtro ==============
+# === CLASSE DE FILTRO ===
 class SensorFiltro:
     def __init__(self, max_len=5, tolerancia=5.0):
         self.temperaturas = []
@@ -88,9 +85,9 @@ class SensorFiltro:
 
     def filtrar(self, nova_temp, nova_umid):
         if nova_temp == 0.0 or nova_umid == 0.0:
-            return None  # valor suspeito
+            return None
 
-        if not self.temperaturas or not self.umidades:
+        if not self.temperaturas:
             self._add(nova_temp, nova_umid)
             return nova_temp, nova_umid
 
@@ -99,7 +96,7 @@ class SensorFiltro:
 
         if (abs(nova_temp - media_temp) > self.tolerancia or
             abs(nova_umid - media_umid) > self.tolerancia):
-            return None  # outlier
+            return None
 
         self._add(nova_temp, nova_umid)
         return nova_temp, nova_umid
@@ -111,99 +108,21 @@ class SensorFiltro:
             self.temperaturas.pop(0)
             self.umidades.pop(0)
 
-# Thread para piscar LEDs na sequência especificada
-# def piscar_leds_sequencia():
-#    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
-#    while True:
-#        for cor in ordem:
-#            for c, pin in LED_PINS.items():
-#                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
-#            time.sleep(0.5)  # Pisca a cada 200ms
-
-def monitorar_leds_parametrizado(
-    limite_baixo=27.5,
-    limite_ideal=31.0,
-    limite_alerta=32.0,
-    tempo_alerta=30
-):
-    fora_faixa = False
-    tempo_fora = None
-
-    while True:
-        temp = display.dados_display['temp1']
-
-        if temp == 0.0:
-            time.sleep(1)
-            continue
-
-        agora = time.time()
-
-        # Determina faixa
-        dentro_faixa = limite_baixo <= temp <= limite_ideal
-        acima_limite_alerta = temp > limite_alerta
-
-        # Controla tempo fora da faixa
-        if dentro_faixa:
-            tempo_fora = None
-            fora_faixa = False
-        elif acima_limite_alerta:
-            if not fora_faixa:
-                tempo_fora = agora
-                fora_faixa = True
-
-        # Escolhe cor do LED
-        if temp < limite_baixo:
-            cor = 'Azul'
-        elif temp <= limite_ideal:
-            cor = 'Verde'
-        else:
-            cor = 'Vermelho'
-
-        # Alerta por tempo acima do limite_alerta
-        if fora_faixa and tempo_fora and (agora - tempo_fora) > tempo_alerta:
-            # Piscar LED amarelo
-            GPIO.output(LED_PINS['Azul'], GPIO.LOW)
-            GPIO.output(LED_PINS['Verde'], GPIO.LOW)
-            GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
-            GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
-            time.sleep(0.5)
-            GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
-            time.sleep(0.5)
-            continue
-
-        # Liga apenas o LED da faixa correspondente
-        for nome, pin in LED_PINS.items():
-            GPIO.output(pin, GPIO.HIGH if nome == cor else GPIO.LOW)
-
-        time.sleep(1)
-
-# Thread para ler sensores com filtragem
-def ler_sensores():
-    filtro1 = SensorFiltro()
-    filtro2 = SensorFiltro()
-    try:
+# === THREAD SENSORES ===
+def thread_sensores():
+    def ler():
+        filtro1 = SensorFiltro()
+        filtro2 = SensorFiltro()
         while True:
-            result = read_dht22(DHT_PIN)
-            result2 = read_dht22(DHT_PIN2)
-
-            if result:
-                temp1, hum1 = result
-                f1 = filtro1.filtrar(temp1, hum1)
-            else:
-                f1 = None
-
-            if result2:
-                temp2, hum2 = result2
-                f2 = filtro2.filtrar(temp2, hum2)
-            else:
-                f2 = None
-
+            r1 = read_dht22(DHT_PIN)
+            r2 = read_dht22(DHT_PIN2)
+            f1 = filtro1.filtrar(*r1) if r1 else None
+            f2 = filtro2.filtrar(*r2) if r2 else None
             if f1 and f2:
                 display.atualizar_temperatura_umidade(f1[0], f1[1], f2[0], f2[1])
-                print("S1: {:.1f}°C {:.0f}% | S2: {:.1f}°C {:.0f}%".format(
-                    f1[0], f1[1], f2[0], f2[1]))
+                print(f"S1: {f1[0]:.1f}C {f1[1]:.0f}% | S2: {f2[0]:.1f}C {f2[1]:.0f}%")
             else:
-                print("Leitura inválida ou fora de padrão")
+                print("Leitura inválida")
 
             GPIO.setup(DHT_PIN, GPIO.OUT)
             GPIO.output(DHT_PIN, GPIO.HIGH)
@@ -211,14 +130,36 @@ def ler_sensores():
             GPIO.output(DHT_PIN2, GPIO.HIGH)
 
             time.sleep(4)
-    except KeyboardInterrupt:
-        GPIO.cleanup()
+    return threading.Thread(target=ler, daemon=True)
 
-# Inicia threads separadas
-# Funções para retornar as threads (para uso em main.py)
-def thread_leds():
-    return threading.Thread(target=piscar_leds_sequencia, daemon=True)
+# === THREAD LEDS ===
+def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_critico=30):
+    def monitorar():
+        tempo_acima = 0
+        while True:
+            t1 = display.dados_display['temp1']
 
-def thread_sensores():
-    return threading.Thread(target=ler_sensores, daemon=True)
-
+            if t1 < faixa_baixa:
+                GPIO.output(LED_PINS['Azul'], GPIO.HIGH)
+                GPIO.output(LED_PINS['Verde'], GPIO.LOW)
+                GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
+            elif t1 < faixa_media:
+                GPIO.output(LED_PINS['Azul'], GPIO.LOW)
+                GPIO.output(LED_PINS['Verde'], GPIO.HIGH)
+                GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
+            else:
+                GPIO.output(LED_PINS['Azul'], GPIO.LOW)
+                GPIO.output(LED_PINS['Verde'], GPIO.LOW)
+                GPIO.output(LED_PINS['Vermelho'], GPIO.HIGH)
+                tempo_acima += 1
+            
+            # Pisca amarelo se passar tempo crítico
+            if tempo_acima * 2 >= tempo_critico:
+                GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
+                time.sleep(0.2)
+                GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
+                time.sleep(0.2)
+            else:
+                GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
+                time.sleep(2)
+    return threading.Thread(target=monitorar, daemon=True)
