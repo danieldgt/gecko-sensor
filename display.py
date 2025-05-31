@@ -62,7 +62,7 @@ def render_image():
         for chave, val in dados_display['reles'].items():
             label = nomes_reles.get(chave, chave)
             estado = 'ON' if val else 'OFF'
-            texto = "{} - {}: {}".format(chave, label, estado)
+            texto = "{}-{}: {}".format(chave, label, estado)
             draw.text((0, y), texto, font=font, fill=255)
             y += 12
     elif pagina_atual == 2:
