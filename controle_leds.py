@@ -41,7 +41,6 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
                 GPIO.output(LED_PINS['Azul'], GPIO.LOW)
                 GPIO.output(LED_PINS['Verde'], GPIO.LOW)
                 GPIO.output(LED_PINS['Vermelho'], GPIO.HIGH)
-                GPIO.output(PORTA_1_RELE, GPIO.LOW)
                 # Só começa a contar o tempo se ultrapassou a faixa crítica
                 if t1 >= temp_critica:
                     if inicio_temp_alta is None:
@@ -51,11 +50,14 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
     
             # Pisca amarelo se passou o tempo crítico
             if inicio_temp_alta and (time.time() - inicio_temp_alta >= tempo_critico):
+                GPIO.output(PORTA_1_RELE, GPIO.LOW)
                 GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
                 time.sleep(0.2)
                 GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
                 time.sleep(0.2)
             else:
+                GPIO.output(PORTA_1_RELE, GPIO.HIGH)
+                GPIO.output(PORTA_1_RELE, GPIO.LOW)
                 GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
                 time.sleep(2)
     return threading.Thread(target=monitorar, daemon=True)
