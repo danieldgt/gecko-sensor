@@ -131,35 +131,3 @@ def thread_sensores():
 
             time.sleep(4)
     return threading.Thread(target=ler, daemon=True)
-
-# === THREAD LEDS ===
-def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_critico=30):
-    def monitorar():
-        tempo_acima = 0
-        while True:
-            t1 = display.dados_display['temp1']
-
-            if t1 < faixa_baixa:
-                GPIO.output(LED_PINS['Azul'], GPIO.HIGH)
-                GPIO.output(LED_PINS['Verde'], GPIO.LOW)
-                GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
-            elif t1 < faixa_media:
-                GPIO.output(LED_PINS['Azul'], GPIO.LOW)
-                GPIO.output(LED_PINS['Verde'], GPIO.HIGH)
-                GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
-            else:
-                GPIO.output(LED_PINS['Azul'], GPIO.LOW)
-                GPIO.output(LED_PINS['Verde'], GPIO.LOW)
-                GPIO.output(LED_PINS['Vermelho'], GPIO.HIGH)
-                tempo_acima += 1
-            
-            # Pisca amarelo se passar tempo crítico
-            if tempo_acima * 2 >= tempo_critico:
-                GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
-                time.sleep(0.2)
-                GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
-                time.sleep(0.2)
-            else:
-                GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
-                time.sleep(2)
-    return threading.Thread(target=monitorar, daemon=True)
