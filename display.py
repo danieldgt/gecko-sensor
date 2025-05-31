@@ -5,7 +5,7 @@ import threading
 import time
 
 I2C_ADDR = 0x3C
-WIDTH = 128
+WIDTH = 100
 HEIGHT = 64
 bus = smbus.SMBus(1)
 
