@@ -1,31 +1,28 @@
-import display
 import ASUS.GPIO as GPIO
 import time
 import threading
+import display
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
-# Pinos dos sensores
-DHT_PIN = 7   # Pino físico 7 (GPIO 4)
-DHT_PIN2 = 8  # Pino físico 8 (GPIO 14)
-
-# Pinos dos LEDs
+# Pinos
+DHT_PIN = 7
+DHT_PIN2 = 8
 LED_PINS = {
-    'Azul': 11,     # GPIO 17
-    'Verde': 13,    # GPIO 27
-    'Vermelho': 15, # GPIO 22
-    'Amarelo': 16   # GPIO 23
+    'Azul': 11,
+    'Verde': 13,
+    'Vermelho': 15,
+    'Amarelo': 16
 }
 
-# Inicializa os pinos dos LEDs
+# Setup dos LEDs
 for pin in LED_PINS.values():
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
 
 def read_dht22(pin):
     data = []
-
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
     time.sleep(0.02)
@@ -67,64 +64,38 @@ def read_dht22(pin):
     checksum = bytes_data[4]
 
     if ((sum(bytes_data[:4])) & 0xFF) != checksum:
-        print("Checksum inválido")
         return None
 
     humidity = humidity_raw / 10.0
-
     if temperature_raw & 0x8000:
         temperature_raw = -(temperature_raw & 0x7FFF)
     temperature = temperature_raw / 10.0
-
     return temperature, humidity
 
-# Thread para piscar LEDs na sequência especificada
-def piscar_leds_sequencia():
-    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
-    while True:
-        for cor in ordem:
-            for c, pin in LED_PINS.items():
-                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
-            time.sleep(0.5)  # Pisca a cada 200ms
+def thread_leds():
+    def piscar():
+        ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
+        while True:
+            for cor in ordem:
+                for c, pin in LED_PINS.items():
+                    GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
+                time.sleep(0.2)
+    return threading.Thread(target=piscar, daemon=True)
 
-# Thread para ler sensores
-def ler_sensores():
-    try:
+def thread_sensores():
+    def ler():
         while True:
             result = read_dht22(DHT_PIN)
             result2 = read_dht22(DHT_PIN2)
+            temp1, hum1 = result if result else (0.0, 0.0)
+            temp2, hum2 = result2 if result2 else (0.0, 0.0)
 
-            if result:
-                temp1, hum1 = result
-            else:
-                temp1, hum1 = 0.0, 0.0
-
-            if result2:
-                temp2, hum2 = result2
-            else:
-                temp2, hum2 = 0.0, 0.0
-
-            print("S1 - {:.1f}°C, {:.0f}% | S2 - {:.1f}°C, {:.0f}%".format(
-                temp1, hum1, temp2, hum2))
-
-            # Atualiza o display com os dados lidos
             display.atualizar_temperatura_umidade(temp1, hum1, temp2, hum2)
 
-            # Reset dos pinos
             GPIO.setup(DHT_PIN, GPIO.OUT)
             GPIO.output(DHT_PIN, GPIO.HIGH)
             GPIO.setup(DHT_PIN2, GPIO.OUT)
             GPIO.output(DHT_PIN2, GPIO.HIGH)
 
             time.sleep(4)
-    except KeyboardInterrupt:
-        GPIO.cleanup()
-
-# Inicia threads separadas
-t1 = threading.Thread(target=piscar_leds_sequencia, daemon=True)
-t2 = threading.Thread(target=ler_sensores)
-
-t1.start()
-t2.start()
-
-t2.join()
+    return threading.Thread(target=ler, daemon=True)
