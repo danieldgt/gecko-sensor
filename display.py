@@ -47,10 +47,10 @@ def render_image():
     if pagina_atual == 0:
         draw.text((0, 0), "Sensores", font=font, fill=255)
     
-        draw.text((0, 16), "S1: {:.1f}C  {:>3.0f}%".format(
+        draw.text((0, 16), "Terrario: {:.1f}C  {:>3.0f}%".format(
             dados_display['temp1'], dados_display['umid1']), font=font, fill=255)
     
-        draw.text((0, 32), "S2: {:.1f}C  {:>3.0f}%".format(
+        draw.text((0, 32), "Toca Aquecida: {:.1f}C  {:>3.0f}%".format(
             dados_display['temp2'], dados_display['umid2']), font=font, fill=255)
     elif pagina_atual == 1:
         draw.text((0, 0), "Status Rele:", font=font, fill=255)
