@@ -112,13 +112,70 @@ class SensorFiltro:
             self.umidades.pop(0)
 
 # Thread para piscar LEDs na sequência especificada
-def piscar_leds_sequencia():
-    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
+# def piscar_leds_sequencia():
+#    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
+#    while True:
+#        for cor in ordem:
+#            for c, pin in LED_PINS.items():
+#                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
+#            time.sleep(0.5)  # Pisca a cada 200ms
+
+def monitorar_leds_parametrizado(
+    limite_baixo=27.5,
+    limite_ideal=31.0,
+    limite_alerta=32.0,
+    tempo_alerta=30
+):
+    fora_faixa = False
+    tempo_fora = None
+
     while True:
-        for cor in ordem:
-            for c, pin in LED_PINS.items():
-                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
-            time.sleep(0.5)  # Pisca a cada 200ms
+        temp = display.dados_display['temp1']
+
+        if temp == 0.0:
+            time.sleep(1)
+            continue
+
+        agora = time.time()
+
+        # Determina faixa
+        dentro_faixa = limite_baixo <= temp <= limite_ideal
+        acima_limite_alerta = temp > limite_alerta
+
+        # Controla tempo fora da faixa
+        if dentro_faixa:
+            tempo_fora = None
+            fora_faixa = False
+        elif acima_limite_alerta:
+            if not fora_faixa:
+                tempo_fora = agora
+                fora_faixa = True
+
+        # Escolhe cor do LED
+        if temp < limite_baixo:
+            cor = 'Azul'
+        elif temp <= limite_ideal:
+            cor = 'Verde'
+        else:
+            cor = 'Vermelho'
+
+        # Alerta por tempo acima do limite_alerta
+        if fora_faixa and tempo_fora and (agora - tempo_fora) > tempo_alerta:
+            # Piscar LED amarelo
+            GPIO.output(LED_PINS['Azul'], GPIO.LOW)
+            GPIO.output(LED_PINS['Verde'], GPIO.LOW)
+            GPIO.output(LED_PINS['Vermelho'], GPIO.LOW)
+            GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
+            time.sleep(0.5)
+            GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
+            time.sleep(0.5)
+            continue
+
+        # Liga apenas o LED da faixa correspondente
+        for nome, pin in LED_PINS.items():
+            GPIO.output(pin, GPIO.HIGH if nome == cor else GPIO.LOW)
+
+        time.sleep(1)
 
 # Thread para ler sensores com filtragem
 def ler_sensores():
