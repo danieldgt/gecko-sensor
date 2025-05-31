@@ -1,5 +1,4 @@
 import display
-import le_dht22
 import time
 
 # Inicia o display e as páginas automáticas
