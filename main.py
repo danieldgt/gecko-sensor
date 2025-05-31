@@ -3,7 +3,7 @@ import time
 
 display.iniciar_display()
 
-display.atualizar_gecko("Samuel", "7 Anos")
+display.atualizar_gecko("Maracuja", "6 meses")
 display.atualizar_reles({'R1': True, 'R2': False, 'R3': True, 'R4': False})
 
 while True:
