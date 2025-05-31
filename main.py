@@ -23,10 +23,10 @@ tempo_critico = 30  # segundos
 
 # Inicializa as threads passando os parâmetros definidos
 thread_sensor = le_dht22.thread_sensores()
-thread_led = le_dht22.thread_leds_temperatura(
-    zona_fria=zona_fria,
-    zona_quente=zona_quente,
-    zona_critica=critica,
+thread_led = le_dht22.thread_leds(
+    temp_critica=critica,
+    faixa_baixa=zona_fria,
+    faixa_media=zona_quente,
     tempo_critico=tempo_critico
 )
 
