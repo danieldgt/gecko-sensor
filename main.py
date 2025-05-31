@@ -2,10 +2,10 @@ import display
 import le_dht22
 import time
 
-# Inicia o display e a thread de alternância de páginas
+# Inicia o display e as páginas automáticas
 display.iniciar_display()
 
-# Atualiza informações fixas
+# Atualiza dados fixos
 display.atualizar_gecko(nome="Maracujá", idade="6 meses")
 display.atualizar_reles({
     'R1': True,
@@ -14,21 +14,29 @@ display.atualizar_reles({
     'R4': False
 })
 
-# Inicia as threads de sensores e LEDs
-thread_leds = threading.Thread(
-    target=lambda: le_dht22.monitorar_leds_parametrizado(
-        limite_baixo=27.5,
-        limite_ideal=31.0,
-        limite_alerta=32.0,
-        tempo_alerta=30
-    ),
-    daemon=True
-)
-thread_leds.start()
+# Define os parâmetros de temperatura para os LEDs
+# zona_fria < zona_normal < zona_quente < critica
+zona_fria = 27.5
+zona_quente = 31.0
+critica = 32.0
+tempo_critico = 30  # segundos
 
-thread_sensores = le_dht22.thread_sensores()
-thread_sensores.start()
+# Inicializa as threads passando os parâmetros definidos
+thread_sensor = le_dht22.thread_sensores()
+thread_led = le_dht22.thread_leds_temperatura(
+    zona_fria=zona_fria,
+    zona_quente=zona_quente,
+    zona_critica=critica,
+    tempo_critico=tempo_critico
+)
+
+# Inicia as threads
+thread_sensor.start()
+thread_led.start()
 
 # Mantém o programa principal vivo
-while True:
-    time.sleep(1)
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    print("Encerrando o programa.")
