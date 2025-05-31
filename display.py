@@ -3,6 +3,13 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL import ImageOps
 import threading
 import time
+from PIL import ImageFont
+
+# Fonte padrão
+font = ImageFont.load_default()
+
+# Fonte maior (pode ajustar o tamanho conforme necessário)
+font_maior = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
 
 I2C_ADDR = 0x3C
 WIDTH = 128
@@ -45,14 +52,14 @@ def render_image():
 
     global pagina_atual
     if pagina_atual == 0:
-        draw.text((0, 0), "Terrário", font=font, fill=255)
+        draw.text((0, 0), "Toca Aquecida", font=font, fill=255)
         draw.text((0, 16), "{:.1f}ºC  {:>3.0f}%".format(
-            dados_display['temp1'], dados_display['umid1']), font=font, fill=255)
+            dados_display['temp1'], dados_display['umid1']), font=font_maior, fill=255)
     
     elif pagina_atual == 1:
-        draw.text((0, 0), "Toca Aquecida", font=font, fill=255)
+        draw.text((0, 0), "Toca Umida", font=font, fill=255)
         draw.text((0, 32), "{:.1f}ºC  {:>3.0f}%".format(
-            dados_display['temp2'], dados_display['umid2']), font=font, fill=255)
+            dados_display['temp2'], dados_display['umid2']), font=font_maior, fill=255)
         
     elif pagina_atual == 2:
         draw.text((0, 0), "Status Rele:", font=font, fill=255)
