@@ -56,7 +56,7 @@ def render_image():
             draw.text((0, y), "{}: {}".format(chave, 'ON' if val else 'OFF'), font=font, fill=255)
             y += 12
     elif pagina_atual == 2:
-        draw.text((0, 0), "Gecko", font=font, fill=255)
+        draw.text((0, 0), "Gecko Leopard", font=font, fill=255)
         draw.text((0, 16), "Nome: {}".format(dados_display['gecko']['nome']), font=font, fill=255)
         draw.text((0, 32), "Idade: {}".format(dados_display['gecko']['idade']), font=font, fill=255)
     elif pagina_atual == 3:
@@ -89,7 +89,7 @@ def loop_display():
     while True:
         img = render_image()
         enviar_imagem(img)
-        time.sleep(3)
+        time.sleep(4)
         pagina_atual = (pagina_atual + 1) % 4
 
 # Interfaces públicas:
