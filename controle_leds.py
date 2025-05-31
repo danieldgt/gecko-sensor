@@ -11,9 +11,14 @@ LED_PINS = {
     'Amarelo': 16
 }
 
+PORTA_1_RELE = 18;
+
 for pin in LED_PINS.values():
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
+
+GPIO.setup(PORTA_1_RELE, GPIO.OUT)
+GPIO.output(PORTA_1_RELE, GPIO.HIGH)
 
 def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_critico=30):
     def monitorar():
@@ -36,6 +41,7 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
                 GPIO.output(LED_PINS['Azul'], GPIO.LOW)
                 GPIO.output(LED_PINS['Verde'], GPIO.LOW)
                 GPIO.output(LED_PINS['Vermelho'], GPIO.HIGH)
+                GPIO.output(PORTA_1_RELE, GPIO.LOW)
                 # Só começa a contar o tempo se ultrapassou a faixa crítica
                 if t1 >= temp_critica:
                     if inicio_temp_alta is None:
