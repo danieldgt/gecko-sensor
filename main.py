@@ -1,10 +1,17 @@
 import display
 import time
+import le_dht22
+import ASUS.GPIO as GPIO
 # Inicia o display e a thread de atualização automática
 display.iniciar_display()
 
 # Atualiza dados da página 2 (informações do Gecko)
 display.atualizar_gecko(nome="Maracujá", idade="6 meses")
+
+
+# Inicialização
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
 
 # Atualiza dados da página 1 (status dos relés)
 display.atualizar_reles({
