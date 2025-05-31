@@ -30,8 +30,8 @@ def mostrar_status(temp1, umid1, temp2, umid2):
     font = ImageFont.load_default()
 
     draw.text((0, 0), "Terrario Gecko", font=font, fill=255)
-    draw.text((0, 16), f"T1: {temp1:.1f}C  U1: {umid1:.0f}%", font=font, fill=255)
-    draw.text((0, 32), f"T2: {temp2:.1f}C  U2: {umid2:.0f}%", font=font, fill=255)
+    draw.text((0, 16), "T1: {:.1f}C  U1: {:.0f}%".format(temp1, umid1), font=font, fill=255)
+    draw.text((0, 32), "T2: {:.1f}C  U2: {:.0f}%".format(temp2, umid2), font=font, fill=255)
 
     # Converte para bytes paginados
     pixels = image.load()
