@@ -9,16 +9,6 @@ GPIO.setmode(GPIO.BOARD)
 # === CONFIGURACAO DE PINOS ===
 DHT_PIN = 7
 DHT_PIN2 = 8
-LED_PINS = {
-    'Azul': 11,     # GPIO 17
-    'Verde': 13,    # GPIO 27
-    'Vermelho': 15, # GPIO 22
-    'Amarelo': 16   # GPIO 23
-}
-
-for pin in LED_PINS.values():
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
 
 # === SENSOR DHT22 ===
 def read_dht22(pin):
@@ -120,7 +110,7 @@ def thread_sensores():
             f2 = filtro2.filtrar(*r2) if r2 else None
             if f1 and f2:
                 display.atualizar_temperatura_umidade(f1[0], f1[1], f2[0], f2[1])
-                print("S1: {:.1f}C {:.0f}% | S2: {:.1f}C {:.0f}%".format(f1[0], f1[1], f2[0], f2[1]))
+                print("S1: {:.1f}ºC {:.0f}% | S2: {:.1f}ºC {:.0f}%".format(f1[0], f1[1], f2[0], f2[1]))
             else:
                 print("Leitura inválida")
 
