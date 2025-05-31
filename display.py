@@ -45,13 +45,14 @@ def render_image():
 
     global pagina_atual
     if pagina_atual == 0:
-        draw.text((0, 0), "Sensores", font=font, fill=255)
-    
-        draw.text((0, 16), "Terrario: {:.1f}C  {:>3.0f}%".format(
+        draw.text((0, 0), "Terrário", font=font, fill=255)
+        draw.text((0, 16), "{:.1f}ºC  {:>3.0f}%".format(
             dados_display['temp1'], dados_display['umid1']), font=font, fill=255)
-    
-        draw.text((0, 32), "Toca Aquecida: {:.1f}C  {:>3.0f}%".format(
+        
+        draw.text((0, 0), "Toca Aquecida", font=font, fill=255)
+        draw.text((0, 32), "{:.1f}ºC  {:>3.0f}%".format(
             dados_display['temp2'], dados_display['umid2']), font=font, fill=255)
+        
     elif pagina_atual == 1:
         draw.text((0, 0), "Status Rele:", font=font, fill=255)
         y = 16
