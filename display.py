@@ -122,11 +122,11 @@ def iniciar_display():
     t.start()
 
 def atualizar_temperatura_umidade(t, u, numero_sensor):
-    if(numero_sensor == 1)
+    if numero_sensor == 1
         dados_display['temp1'] = t
         dados_display['umid1'] = u
 
-    if(numero_sensor == 2)
+    elif numero_sensor == 2
         dados_display['temp2'] = t
         dados_display['umid2'] = u
 
