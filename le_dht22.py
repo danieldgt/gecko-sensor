@@ -108,11 +108,17 @@ def thread_sensores():
             r2 = read_dht22(DHT_PIN2)
             f1 = filtro1.filtrar(*r1) if r1 else None
             f2 = filtro2.filtrar(*r2) if r2 else None
-            if f1 and f2:
-                display.atualizar_temperatura_umidade(f1[0], f1[1], f2[0], f2[1])
-                print("S1: {:.1f}ºC {:.0f}% | S2: {:.1f}ºC {:.0f}%".format(f1[0], f1[1], f2[0], f2[1]))
+            if f1:
+                display.atualizar_temperatura_umidade(f1[0], f1[1], 1)
+                print("S1: {:.1f}ºC {:.0f}%".format(f1[0], f1[1]))
             else:
-                print("Leitura inválida")
+                print("Leitura inválida - S1")
+
+            if f2:
+                display.atualizar_temperatura_umidade(f2[0], f2[1], 2)
+                print("S2: {:.1f}ºC {:.0f}%".format(f2[0], f2[1]))
+            else:
+                print("Leitura inválida - S2")
 
             GPIO.setup(DHT_PIN, GPIO.OUT)
             GPIO.output(DHT_PIN, GPIO.HIGH)
