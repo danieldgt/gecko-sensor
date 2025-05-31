@@ -57,7 +57,6 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
                 time.sleep(0.2)
             else:
                 GPIO.output(PORTA_1_RELE, GPIO.HIGH)
-                GPIO.output(PORTA_1_RELE, GPIO.LOW)
                 GPIO.output(LED_PINS['Amarelo'], GPIO.LOW)
                 time.sleep(2)
     return threading.Thread(target=monitorar, daemon=True)
