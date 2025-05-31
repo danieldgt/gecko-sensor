@@ -5,7 +5,7 @@ import threading
 import time
 
 I2C_ADDR = 0x3C
-WIDTH = 100
+WIDTH = 128
 HEIGHT = 64
 bus = smbus.SMBus(1)
 
@@ -63,7 +63,7 @@ def render_image():
         try:
             logo = Image.open("gecko.bmp").convert("1")
             logo = ImageOps.invert(logo)  # se necessário inverter cores
-            logo = logo.resize((WIDTH, HEIGHT))
+            logo = logo.resize((100, HEIGHT))
             image.paste(logo, (0, 0))
         except:
             draw.text((0, 24), "Imagem gecko.bmp", font=font, fill=255)
