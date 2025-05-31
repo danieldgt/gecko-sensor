@@ -20,8 +20,8 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
         inicio_temp_alta = None
         while True:
             t1 = display.dados_display['temp1']
-
-            # Lógica das faixas
+    
+            # Faixas de temperatura com cores
             if t1 < faixa_baixa:
                 GPIO.output(LED_PINS['Azul'], GPIO.HIGH)
                 GPIO.output(LED_PINS['Verde'], GPIO.LOW)
@@ -36,10 +36,14 @@ def thread_leds(temp_critica=31.0, faixa_baixa=27.5, faixa_media=30.0, tempo_cri
                 GPIO.output(LED_PINS['Azul'], GPIO.LOW)
                 GPIO.output(LED_PINS['Verde'], GPIO.LOW)
                 GPIO.output(LED_PINS['Vermelho'], GPIO.HIGH)
-                if inicio_temp_alta is None:
-                    inicio_temp_alta = time.time()
-
-            # Verifica se já passou o tempo crítico
+                # Só começa a contar o tempo se ultrapassou a faixa crítica
+                if t1 >= temp_critica:
+                    if inicio_temp_alta is None:
+                        inicio_temp_alta = time.time()
+                else:
+                    inicio_temp_alta = None  # temperatura baixou antes da crítica
+    
+            # Pisca amarelo se passou o tempo crítico
             if inicio_temp_alta and (time.time() - inicio_temp_alta >= tempo_critico):
                 GPIO.output(LED_PINS['Amarelo'], GPIO.HIGH)
                 time.sleep(0.2)
