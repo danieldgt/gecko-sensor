@@ -53,7 +53,7 @@ def render_image():
     global pagina_atual
     if pagina_atual == 0:
         draw.text((0, 0), "Toca Aquecida", font=font_maior, fill=255)
-        draw.text((0, 16), "{:.1f}ºC  {:>3.0f}%".format(
+        draw.text((0, 32), "{:.1f}ºC  {:>3.0f}%".format(
             dados_display['temp1'], dados_display['umid1']), font=font_maior, fill=255)
     
     elif pagina_atual == 1:
@@ -62,7 +62,7 @@ def render_image():
             dados_display['temp2'], dados_display['umid2']), font=font_maior, fill=255)
         
     elif pagina_atual == 2:
-        draw.text((0, 0), "Status Rele:", font=font_maior, fill=255)
+        draw.text((0, 0), "Status Rele", font=font_maior, fill=255)
         y = 16
         nomes_reles = {
             'R1': 'Toca Aquecida',
@@ -78,7 +78,7 @@ def render_image():
             draw.text((0, y), texto, font=font, fill=255)
             y += 12
     elif pagina_atual == 3:
-        draw.text((0, 0), "Gecko Leopard", font=font, fill=255)
+        draw.text((0, 0), "Gecko Leopard", font=font_maior, fill=255)
         draw.text((0, 16), "Nome: {}".format(dados_display['gecko']['nome']), font=font_maior, fill=255)
         draw.text((0, 32), "Idade: {}".format(dados_display['gecko']['idade']), font=font_maior, fill=255)
     elif pagina_atual == 4:
