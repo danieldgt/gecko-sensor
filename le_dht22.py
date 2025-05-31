@@ -1,4 +1,5 @@
-import ASUS.GPIO as GPIO
+#import ASUS.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 import threading
 
