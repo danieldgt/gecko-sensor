@@ -105,7 +105,7 @@ def loop_display():
         img = render_image()
         enviar_imagem(img)
         time.sleep(4)
-        pagina_atual = (pagina_atual + 1) % 4
+        pagina_atual = (pagina_atual + 1) % 5
 
 # Interfaces públicas:
 
