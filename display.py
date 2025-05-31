@@ -52,8 +52,18 @@ def render_image():
     elif pagina_atual == 1:
         draw.text((0, 0), "Status Rele:", font=font, fill=255)
         y = 16
+        nomes_reles = {
+            'R1': 'Toca Aquecida',
+            'R2': 'Toca Umida',
+            'R3': 'Cooler',
+            'R4': 'Iluminacao'
+        }
+    
         for chave, val in dados_display['reles'].items():
-            draw.text((0, y), "{}: {}".format(chave, 'ON' if val else 'OFF'), font=font, fill=255)
+            label = nomes_reles.get(chave, chave)
+            estado = 'ON' if val else 'OFF'
+            texto = "{} - {}: {}".format(chave, label, estado)
+            draw.text((0, y), texto, font=font, fill=255)
             y += 12
     elif pagina_atual == 2:
         draw.text((0, 0), "Gecko Leopard", font=font, fill=255)
