@@ -158,10 +158,10 @@ def ler_sensores():
         GPIO.cleanup()
 
 # Inicia threads separadas
-t1 = threading.Thread(target=piscar_leds_sequencia, daemon=True)
-t2 = threading.Thread(target=ler_sensores)
+# Funções para retornar as threads (para uso em main.py)
+def thread_leds():
+    return threading.Thread(target=piscar_leds_sequencia, daemon=True)
 
-t1.start()
-t2.start()
+def thread_sensores():
+    return threading.Thread(target=ler_sensores, daemon=True)
 
-t2.join()
