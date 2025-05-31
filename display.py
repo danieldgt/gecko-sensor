@@ -121,11 +121,13 @@ def iniciar_display():
     t = threading.Thread(target=loop_display, daemon=True)
     t.start()
 
-def atualizar_temperatura_umidade(t1, u1, t2, u2):
-    dados_display['temp1'] = t1
-    dados_display['umid1'] = u1
-    dados_display['temp2'] = t2
-    dados_display['umid2'] = u2
+def atualizar_temperatura_umidade(t, u, numero_sensor):
+    if(numero_sensor == 1)
+        dados_display['temp1'] = t
+        dados_display['umid1'] = u
+    else if(numero_sensor == 2)
+        dados_display['temp2'] = t
+        dados_display['umid2'] = u
 
 def atualizar_reles(rele_dict):
     dados_display['reles'] = rele_dict
