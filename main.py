@@ -8,10 +8,10 @@ display.atualizar_gecko(nome="Maracujá", idade="6 meses")
 
 # Atualiza dados da página 1 (status dos relés)
 display.atualizar_reles({
-    'Toca Aquecida': True,   # ligado
-    'Toca Umida': False,  # desligado
-    'Cooler': True,
-    'Luz': False
+    'R1': True,   # ligado
+    'R2': False,  # desligado
+    'R3': True,
+    'R4': False
 })
 
 # Loop que simula leitura de sensores a cada 5 segundos
