@@ -1,28 +1,31 @@
+import display
 import ASUS.GPIO as GPIO
 import time
 import threading
-import display
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
-# Pinos
-DHT_PIN = 7
-DHT_PIN2 = 8
+# Pinos dos sensores
+DHT_PIN = 7   # Pino físico 7 (GPIO 4)
+DHT_PIN2 = 8  # Pino físico 8 (GPIO 14)
+
+# Pinos dos LEDs
 LED_PINS = {
-    'Azul': 11,
-    'Verde': 13,
-    'Vermelho': 15,
-    'Amarelo': 16
+    'Azul': 11,     # GPIO 17
+    'Verde': 13,    # GPIO 27
+    'Vermelho': 15, # GPIO 22
+    'Amarelo': 16   # GPIO 23
 }
 
-# Setup dos LEDs
+# Inicializa os pinos dos LEDs
 for pin in LED_PINS.values():
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
 
 def read_dht22(pin):
     data = []
+
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
     time.sleep(0.02)
@@ -64,33 +67,86 @@ def read_dht22(pin):
     checksum = bytes_data[4]
 
     if ((sum(bytes_data[:4])) & 0xFF) != checksum:
+        print("Checksum inválido")
         return None
 
     humidity = humidity_raw / 10.0
+
     if temperature_raw & 0x8000:
         temperature_raw = -(temperature_raw & 0x7FFF)
     temperature = temperature_raw / 10.0
+
     return temperature, humidity
 
-def thread_leds():
-    def piscar():
-        ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
-        while True:
-            for cor in ordem:
-                for c, pin in LED_PINS.items():
-                    GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
-                time.sleep(0.2)
-    return threading.Thread(target=piscar, daemon=True)
+# ======== Classe de filtro ==============
+class SensorFiltro:
+    def __init__(self, max_len=5, tolerancia=5.0):
+        self.temperaturas = []
+        self.umidades = []
+        self.max_len = max_len
+        self.tolerancia = tolerancia
 
-def thread_sensores():
-    def ler():
+    def filtrar(self, nova_temp, nova_umid):
+        if nova_temp == 0.0 or nova_umid == 0.0:
+            return None  # valor suspeito
+
+        if not self.temperaturas or not self.umidades:
+            self._add(nova_temp, nova_umid)
+            return nova_temp, nova_umid
+
+        media_temp = sum(self.temperaturas) / len(self.temperaturas)
+        media_umid = sum(self.umidades) / len(self.umidades)
+
+        if (abs(nova_temp - media_temp) > self.tolerancia or
+            abs(nova_umid - media_umid) > self.tolerancia):
+            return None  # outlier
+
+        self._add(nova_temp, nova_umid)
+        return nova_temp, nova_umid
+
+    def _add(self, temp, umid):
+        self.temperaturas.append(temp)
+        self.umidades.append(umid)
+        if len(self.temperaturas) > self.max_len:
+            self.temperaturas.pop(0)
+            self.umidades.pop(0)
+
+# Thread para piscar LEDs na sequência especificada
+def piscar_leds_sequencia():
+    ordem = ['Amarelo', 'Azul', 'Vermelho', 'Verde', 'Vermelho', 'Azul', 'Amarelo']
+    while True:
+        for cor in ordem:
+            for c, pin in LED_PINS.items():
+                GPIO.output(pin, GPIO.HIGH if c == cor else GPIO.LOW)
+            time.sleep(0.5)  # Pisca a cada 200ms
+
+# Thread para ler sensores com filtragem
+def ler_sensores():
+    filtro1 = SensorFiltro()
+    filtro2 = SensorFiltro()
+    try:
         while True:
             result = read_dht22(DHT_PIN)
             result2 = read_dht22(DHT_PIN2)
-            temp1, hum1 = result if result else (0.0, 0.0)
-            temp2, hum2 = result2 if result2 else (0.0, 0.0)
 
-            display.atualizar_temperatura_umidade(temp1, hum1, temp2, hum2)
+            if result:
+                temp1, hum1 = result
+                f1 = filtro1.filtrar(temp1, hum1)
+            else:
+                f1 = None
+
+            if result2:
+                temp2, hum2 = result2
+                f2 = filtro2.filtrar(temp2, hum2)
+            else:
+                f2 = None
+
+            if f1 and f2:
+                display.atualizar_temperatura_umidade(f1[0], f1[1], f2[0], f2[1])
+                print("S1: {:.1f}°C {:.0f}% | S2: {:.1f}°C {:.0f}%".format(
+                    f1[0], f1[1], f2[0], f2[1]))
+            else:
+                print("Leitura inválida ou fora de padrão")
 
             GPIO.setup(DHT_PIN, GPIO.OUT)
             GPIO.output(DHT_PIN, GPIO.HIGH)
@@ -98,4 +154,14 @@ def thread_sensores():
             GPIO.output(DHT_PIN2, GPIO.HIGH)
 
             time.sleep(4)
-    return threading.Thread(target=ler, daemon=True)
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+# Inicia threads separadas
+t1 = threading.Thread(target=piscar_leds_sequencia, daemon=True)
+t2 = threading.Thread(target=ler_sensores)
+
+t1.start()
+t2.start()
+
+t2.join()
