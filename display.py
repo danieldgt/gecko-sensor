@@ -1,5 +1,6 @@
 import smbus
 from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageOps
 import threading
 import time
 
@@ -58,6 +59,15 @@ def render_image():
         draw.text((0, 0), "Gecko", font=font, fill=255)
         draw.text((0, 16), "Nome: {}".format(dados_display['gecko']['nome']), font=font, fill=255)
         draw.text((0, 32), "Idade: {}".format(dados_display['gecko']['idade']), font=font, fill=255)
+    elif pagina_atual == 3:
+        try:
+            logo = Image.open("gecko.bmp").convert("1")
+            logo = ImageOps.invert(logo)  # se necessário inverter cores
+            logo = logo.resize((WIDTH, HEIGHT))
+            image.paste(logo, (0, 0))
+        except:
+            draw.text((0, 24), "Imagem gecko.bmp", font=font, fill=255)
+            draw.text((0, 40), "nao encontrada", font=font, fill=255)
 
     return image
 
@@ -80,7 +90,7 @@ def loop_display():
         img = render_image()
         enviar_imagem(img)
         time.sleep(3)
-        pagina_atual = (pagina_atual + 1) % 3
+        pagina_atual = (pagina_atual + 1) % 4
 
 # Interfaces públicas:
 
