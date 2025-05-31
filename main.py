@@ -1,4 +1,5 @@
 import display
+import time
 
 display.iniciar_display()
 
