@@ -92,19 +92,24 @@ def ler_sensores():
         while True:
             result = read_dht22(DHT_PIN)
             result2 = read_dht22(DHT_PIN2)
+
             if result:
-                temp, hum = result
-                print("1 - Temperatura: {}°C, Umidade: {}%".format(temp, hum))
+                temp1, hum1 = result
             else:
-                print("Falha ao ler o sensor 1")
+                temp1, hum1 = 0.0, 0.0
 
             if result2:
                 temp2, hum2 = result2
-                print("2 - Temperatura: {}°C, Umidade: {}%".format(temp2, hum2))
             else:
-                print("Falha ao ler o sensor 2")
+                temp2, hum2 = 0.0, 0.0
 
-            # Reset dos pinos dos sensores
+            print("S1 - {:.1f}°C, {:.0f}% | S2 - {:.1f}°C, {:.0f}%".format(
+                temp1, hum1, temp2, hum2))
+
+            # Atualiza o display com os dados lidos
+            display.atualizar_temperatura_umidade(temp1, hum1, temp2, hum2)
+
+            # Reset dos pinos
             GPIO.setup(DHT_PIN, GPIO.OUT)
             GPIO.output(DHT_PIN, GPIO.HIGH)
             GPIO.setup(DHT_PIN2, GPIO.OUT)
